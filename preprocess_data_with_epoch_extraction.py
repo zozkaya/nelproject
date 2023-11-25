@@ -10,6 +10,8 @@ from scipy.signal import iirnotch, butter, filtfilt, lfilter
 ## GLOBALS 
 # input file path 
 path = '/Users/laurenparola/Desktop/NEL_FinalProject/nov7_prelim/'
+start_time = 7.5 # number of seconds before starting trial 
+cahn_num = 8 # specify channel number for processing 
 
 # set data frequency
 fs = 250
@@ -112,7 +114,14 @@ def extract_outlier_epochs(all_trial_array,multiplier):
     out_data = np.transpose(out_data,(1,2,0))
     return out_data
 
-def import_data(path,fs,chan_num):
+"""
+INPUTS: 
+path
+fs 
+chan_used: 4 if you want to use 4 channels, 8 if you want to use all 8 
+chan_num: specify number of channels used 
+"""
+def import_data(path,fs,chan_num,chan_used):
     #create a list of .txt. files in the data folder
     trial_list = [trials for trials in os.listdir(path) if '.txt' in trials]
     i = 0 
@@ -129,11 +138,14 @@ def import_data(path,fs,chan_num):
         #create a list of all channels
         if (chan_num == 4):
             channel_list = [' EXG Channel 0',' EXG Channel 1',' EXG Channel 2',' EXG Channel 3']
-        elif (chan_num == 8):
+        elif (chan_num == 8 and chan_used == 8):
             channel_list = [' EXG Channel 0',' EXG Channel 1',' EXG Channel 2',' EXG Channel 3',
                             ' EXG Channel 4',' EXG Channel 5',' EXG Channel 6',' EXG Channel 7']
+        elif (chan_num == 8 and chan_used == 4):
+            channel_list = [' EXG Channel 0',' EXG Channel 2',' EXG Channel 4',' EXG Channel 6'] #take every other channel
 
-        start_time = start_times_vec[i]
+      #  start_time = start_times_vec[i]
+
         i += 1
 
         
