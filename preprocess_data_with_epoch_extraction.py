@@ -10,15 +10,25 @@ from scipy.signal import iirnotch, butter, filtfilt, lfilter
 ## GLOBALS 
 # input file path 
 path = '/Users/laurenparola/Desktop/NEL_FinalProject/nov7_prelim/'
-start_time = 7.5 # number of seconds before starting trial 
-cahn_num = 8 # specify channel number for processing 
+start_time = 7.5 # number of seconds before starting trial based on bpm of metronome 
+chan_num = 8 # specify channel number for processing 
 
 # set data frequency
 fs = 250
 
-# onset of trials for each gesture 
-start_times_vec = [10.8, 5.076, 7.432, 5.504, 5.424, 8.9,11.06,6.67]
+# MVC - MVC determined using MATLAB - global variable bc one subject 
+# FILL IN ONCE YOU KNOW THE VALUES 
+hand_fist_mvc = 0
+index_finger_point_mvc = 0
+wrist_up_mvc = 0
+wrist_down_mvc = 0
+two_finger_pinch_mvc = 0
+wrist_right_mvc = 0
+wrist_left_mvc = 0
+hand_open_mvc = 0
 
+mvc_mat [hand_fist, index_finger_point_mvc,wrist_up_mvc, wrist_down_mvc, two_finger_pinch_mvc, wrist_right_mvc, wrist_left_mvc, hand_open_mvc]
+#WRITTEN ASSUMING THIS ORDER ?? SHOULD IT BE ALPHABETIC?
 """
 Applies bandpass and notch filter to data 
 
@@ -57,7 +67,7 @@ corresponds to a single epoch
 
 
 """
-def epoch_data(start_time, data, t,epoch_len):
+def epoch_data(start_time, data, t,epoch_len,mvc):
 
     idx = np.where(t >= epoch_len)[0][0] #index corresponding to epoch length 
     idx1 = np.where(t >= start_time)[0][0] #index of the start time
@@ -72,9 +82,9 @@ def epoch_data(start_time, data, t,epoch_len):
         if (i % 2 == 0):
             epoch = data[i:i+idx]
             t_epoch = t[i:i+idx]
-            epoched_data.append(epoch)
+            epoched_data.append(epoch-mvc) # normalize to mvc 
         else:
-            rest_state.append(epoch)
+            rest_state.append(epoch-mvc) # normalize to mvc 
 
     epoched_data = np.array(epoched_data).T  # transpose for the desired format
     rest_state = np.array(rest_state).T
@@ -146,20 +156,21 @@ def import_data(path,fs,chan_num,chan_used):
 
       #  start_time = start_times_vec[i]
 
-        i += 1
 
         
         all_channels = []
         for channel in channel_list:
             #sort through all channels, trim the epoch data, and append to a 3D matrix called all_channels
-            all_channels.append(epoch_data(start_time, preprocess_data(data[channel].values - np.mean(data[channel].values),fs), t, 1.5))
+            all_channels.append(epoch_data(start_time, preprocess_data(data[channel].values,fs), t, 1.5))
 
         #extract outliers from the 3D matrix where the first axis represents channels, the second axis
         #represents is time, and third axis is the epoch number
         #trimmed_data is the data matrix with the outlier epochs excluded
-        trimmed_data = extract_outlier_epochs(all_channels,8)
+        trimmed_data = extract_outlier_epochs(all_channels,8,mvc_mat[i])
 
         extracted_trials.append(trimmed_data)
+        i += 1
+
         
         psd = []
         for channel in channel_list:
