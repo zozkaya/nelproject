@@ -18,16 +18,16 @@ fs = 250
 
 # MVC - MVC determined using MATLAB - global variable bc one subject 
 # FILL IN ONCE YOU KNOW THE VALUES 
-hand_fist_mvc = 0
-index_finger_point_mvc = 0
-wrist_up_mvc = 0
-wrist_down_mvc = 0
-two_finger_pinch_mvc = 0
-wrist_right_mvc = 0
-wrist_left_mvc = 0
-hand_open_mvc = 0
+hand_fist_mvc = 1
+index_finger_point_mvc = 1
+wrist_up_mvc = 1
+wrist_down_mvc = 1
+two_finger_pinch_mvc = 1
+wrist_right_mvc = 1
+wrist_left_mvc = 1
+hand_open_mvc = 1
 
-mvc_mat [hand_fist, index_finger_point_mvc,wrist_up_mvc, wrist_down_mvc, two_finger_pinch_mvc, wrist_right_mvc, wrist_left_mvc, hand_open_mvc]
+mvc_mat = [hand_fist_mvc, index_finger_point_mvc,wrist_up_mvc, wrist_down_mvc, two_finger_pinch_mvc, wrist_right_mvc, wrist_left_mvc, hand_open_mvc]
 #WRITTEN ASSUMING THIS ORDER ?? SHOULD IT BE ALPHABETIC?
 """
 Applies bandpass and notch filter to data 
@@ -78,13 +78,14 @@ def epoch_data(start_time, data, t,epoch_len,mvc):
 
     # epoch the data starting at first epoch and looking at 
     # every other "epoch_len" second chunk 
-    for i in range(idx1, len(data) - idx):
-        if (i % 2 == 0):
+    for val, i in enumerate(np.arange(idx1, len(data) - idx,idx)):
+        if (val % 2 == 0):
             epoch = data[i:i+idx]
             t_epoch = t[i:i+idx]
-            epoched_data.append(epoch-mvc) # normalize to mvc 
+
+            epoched_data.append(epoch/mvc) # normalize to mvc 
         else:
-            rest_state.append(epoch-mvc) # normalize to mvc 
+            rest_state.append(epoch/mvc) # normalize to mvc 
 
     epoched_data = np.array(epoched_data).T  # transpose for the desired format
     rest_state = np.array(rest_state).T
@@ -104,7 +105,6 @@ def extract_outlier_epochs(all_trial_array,multiplier):
     
     out_data = []
 
-    
     for epoch in range(np.shape(np.array(all_trial_array))[2]):
         #extract a specific epoch
         temp_epoch = np.array(all_trial_array)[:,:,epoch]
@@ -112,7 +112,7 @@ def extract_outlier_epochs(all_trial_array,multiplier):
         #create a 4 by 1 array of threshold based on the average value of each channels times a certain
         #multiplier
         threshold_array = np.mean(np.abs(temp_epoch),axis=1).reshape(4,1) * multiplier
-
+        
         #determine if any value in a channel is greater than its threshold 
         result = np.any(np.abs(temp_epoch) > threshold_array, axis=1)
 
@@ -122,6 +122,7 @@ def extract_outlier_epochs(all_trial_array,multiplier):
             out_data.append(temp_epoch)
     #transpose the out_data to match the input array dimensions 
     out_data = np.transpose(out_data,(1,2,0))
+    
     return out_data
 
 """
@@ -141,7 +142,7 @@ def import_data(path,fs,chan_num,chan_used):
     for val,act in enumerate(trial_list):
         #import .txt file as a pandas dataframe
         data=  pd.read_csv(os.path.join(path,act), header=0,sep=',',skiprows=4)
-
+        
         #set time range
         t = np.arange(1/fs, len(data)/fs + 1/fs,1/fs)
 
@@ -156,17 +157,18 @@ def import_data(path,fs,chan_num,chan_used):
 
       #  start_time = start_times_vec[i]
 
-
-        
-        all_channels = []
+        active_channels = []
+        rest_channels = []
         for channel in channel_list:
             #sort through all channels, trim the epoch data, and append to a 3D matrix called all_channels
-            all_channels.append(epoch_data(start_time, preprocess_data(data[channel].values,fs), t, 1.5))
+            active_epochs, rest_epochs = epoch_data(start_time, preprocess_data(data[channel].values,fs), t, 1.5,mvc_mat[i])
+            active_channels.append(active_epochs)
+            rest_channels.append(rest_epochs)
 
         #extract outliers from the 3D matrix where the first axis represents channels, the second axis
         #represents is time, and third axis is the epoch number
         #trimmed_data is the data matrix with the outlier epochs excluded
-        trimmed_data = extract_outlier_epochs(all_channels,8,mvc_mat[i])
+        trimmed_data = extract_outlier_epochs(active_channels,8,)
 
         extracted_trials.append(trimmed_data)
         i += 1

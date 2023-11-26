@@ -3,9 +3,7 @@ import pandas as pd
 from scipy.signal import iirnotch, butter, filtfilt, lfilter
 import matplotlib.pyplot as plt
 
-data = pd.read_csv('hand_fist.csv')
-fs = 250
-t = np.arange(1/fs, len(data)/fs + 1/fs,1/fs)
+
 
 """
 Applies bandpass and notch filter to data 
@@ -68,4 +66,4 @@ def epoch_data(start_time, data, t,epoch_len):
     
     return epoched_data
 
-epoch_data(10.08, preprocess_data(data.EXGChannel0,fs), t, 1.5)
+

@@ -11,12 +11,11 @@ from extract_features import calc_features,extract_features_trials,get_var_trial
 from matplotlib.colors import LinearSegmentedColormap
 
 
-path = '/Users/zeynepozkaya/Desktop/CMU FALL 23/Neural Engineering Lab/Final Project/drive-download-20231114T015003Z-001/'
+path = '/Users/laurenparola/Documents/GitHub/nelproject/DATA/nov7_prelim/'
 fs = 250 
-trimmed_data, psd = import_data(path, fs)
+trimmed_data,psd= import_data(path, fs,4,4)
 t = np.arange(1/fs, len(trimmed_data[1][0:1, :, 1])/fs + 1/fs,1/fs)
-data = pd.read_csv('hand_fist.csv')
-t_2 = np.arange(1/fs, len(data)/fs + 1/fs,1/fs)
+
 
 
 '''
@@ -142,6 +141,7 @@ def plot_features(iemg, mav, ssi, fmd, fmn, var, rms, avg_chan, avg_epoch):
 
 
 
-iemg, mav, ssi, fmd, fmn, var, rms = extract_features_trials(trimmed_data,psd, False, True)
-plot_features(iemg, mav, ssi, fmd, fmn, var, rms, False,True)
+iemg, mav, ssi, fmd, fmn, var, rms = extract_features_trials(trimmed_data,psd, False, False)
+import pdb; pdb.set_trace()
+#plot_features(iemg, mav, ssi, fmd, fmn, var, rms, False,True)
             
