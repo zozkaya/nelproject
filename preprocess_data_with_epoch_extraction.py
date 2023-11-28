@@ -18,18 +18,6 @@ chan_num = 8 # specify channel number for processing
 # set data frequency
 fs = 250
 
-# MVC - MVC determined using MATLAB - global variable bc one subject 
-# FILL IN ONCE YOU KNOW THE VALUES 
-hand_fist_mvc = 1
-index_finger_point_mvc = 1
-wrist_up_mvc = 1
-wrist_down_mvc = 1
-two_finger_pinch_mvc = 1
-wrist_right_mvc = 1
-wrist_left_mvc = 1
-hand_open_mvc = 1
-
-mvc_mat = [hand_fist_mvc, index_finger_point_mvc,wrist_up_mvc, wrist_down_mvc, two_finger_pinch_mvc, wrist_right_mvc, wrist_left_mvc, hand_open_mvc]
 mvc_dict = calculate_MVC(path_mvc)
 
 #WRITTEN ASSUMING THIS ORDER ?? SHOULD IT BE ALPHABETIC?
