@@ -5,21 +5,29 @@ import numpy as np
 import math
 import scipy as scipy 
 from scipy.signal import iirnotch, butter, filtfilt, lfilter
-from find_MVC import calculate_MVC
+
 
 ## GLOBALS 
 # input file path 
-path = '/Users/zeynepozkaya/Desktop/DATA 2'
-path_mvc = '/Users/zeynepozkaya/Desktop/MVC'
-
+path = '/Users/laurenparola/Desktop/NEL_FinalProject/nov7_prelim/'
 start_time = 7.5 # number of seconds before starting trial based on bpm of metronome 
 chan_num = 8 # specify channel number for processing 
 
 # set data frequency
 fs = 250
 
-mvc_dict = calculate_MVC(path_mvc)
+# MVC - MVC determined using MATLAB - global variable bc one subject 
+# FILL IN ONCE YOU KNOW THE VALUES 
+hand_fist_mvc = 1
+index_finger_point_mvc = 1
+wrist_up_mvc = 1
+wrist_down_mvc = 1
+two_finger_pinch_mvc = 1
+wrist_right_mvc = 1
+wrist_left_mvc = 1
+hand_open_mvc = 1
 
+mvc_mat = [hand_fist_mvc, index_finger_point_mvc,wrist_up_mvc, wrist_down_mvc, two_finger_pinch_mvc, wrist_right_mvc, wrist_left_mvc, hand_open_mvc]
 #WRITTEN ASSUMING THIS ORDER ?? SHOULD IT BE ALPHABETIC?
 """
 Applies bandpass and notch filter to data 
@@ -71,17 +79,15 @@ def epoch_data(start_time, data, t,epoch_len,mvc):
     # epoch the data starting at first epoch and looking at 
     # every other "epoch_len" second chunk 
     for val, i in enumerate(np.arange(idx1, len(data) - idx,idx)):
+        epoch = data[i:i+idx]
+        t_epoch = t[i:i+idx]
         if (val % 2 == 0):
-            epoch = data[i:i+idx]
-            t_epoch = t[i:i+idx]
-
             epoched_data.append(epoch/mvc) # normalize to mvc 
-        else:
+        elif (val % 2 != 0):
             rest_state.append(epoch/mvc) # normalize to mvc 
 
     epoched_data = np.array(epoched_data).T  # transpose for the desired format
     rest_state = np.array(rest_state).T
-
     
     return epoched_data, rest_state 
 
@@ -124,15 +130,15 @@ fs
 chan_used: 4 if you want to use 4 channels, 8 if you want to use all 8 
 chan_num: specify number of channels used 
 """
-def import_data(path,fs,chan_num,chan_used,mvc_dict):
+def import_data(path,fs,chan_num,chan_used):
     #create a list of .txt. files in the data folder
     trial_list = [trials for trials in os.listdir(path) if '.txt' in trials]
     i = 0 
     extracted_trials = []
+    rest_trials = []
+    #sort through all trials
 
-    #sort through all trials 
     for val,act in enumerate(trial_list):
-        i = 0 
         #import .txt file as a pandas dataframe
         data=  pd.read_csv(os.path.join(path,act), header=0,sep=',',skiprows=4)
         
@@ -150,22 +156,13 @@ def import_data(path,fs,chan_num,chan_used,mvc_dict):
 
       #  start_time = start_times_vec[i]
 
-        
-        key = act[0:-4]+"_MVC"
-        mvc_mat = mvc_dict[key]
-
         active_channels = []
         rest_channels = []
         for channel in channel_list:
             #sort through all channels, trim the epoch data, and append to a 3D matrix called all_channels
-            if (chan_num == 8 and chan_used == 4):
-                mvc = mvc_mat[i*2]
-            else:
-                mvc = mvc_mat[i]
-            active_epochs, rest_epochs = epoch_data(start_time, preprocess_data(data[channel].values,fs), t, 1.5,mvc)
+            active_epochs, rest_epochs = epoch_data(start_time, preprocess_data(data[channel].values,fs), t, 1.5,mvc_mat[i])
             active_channels.append(active_epochs)
             rest_channels.append(rest_epochs)
-            i += 1
 
         #extract outliers from the 3D matrix where the first axis represents channels, the second axis
         #represents is time, and third axis is the epoch number
@@ -173,7 +170,8 @@ def import_data(path,fs,chan_num,chan_used,mvc_dict):
         trimmed_data = extract_outlier_epochs(active_channels,8,)
 
         extracted_trials.append(trimmed_data)
-       
+        rest_trials.append(np.array(rest_channels))
+        i += 1
 
         
         psd = []
@@ -183,8 +181,7 @@ def import_data(path,fs,chan_num,chan_used,mvc_dict):
             psd.append(S)
 
         psd = np.array(psd)
-
-    return extracted_trials, psd
+    trial_order = [trial.replace('.txt','') for trial in trial_list]
+    return extracted_trials, rest_trials, psd, trial_order
             
         
-import_data(path,fs,chan_num,4,mvc_dict) 
