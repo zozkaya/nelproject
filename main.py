@@ -9,14 +9,16 @@ from preprocess_data_with_epoch_extraction import extract_outlier_epochs, import
 from preprocess_data import epoch_data,preprocess_data
 from extract_features import calc_features,extract_features_trials,get_var_trial,get_fmn_trial,get_rms_trial
 from matplotlib.colors import LinearSegmentedColormap
+from find_MVC import calculate_MVC
 
-
-path = '/Users/laurenparola/Documents/GitHub/nelproject/DATA/nov7_prelim/'
+path = '/Users/zeynepozkaya/Desktop/DATA 2'
+path_mvc = '/Users/zeynepozkaya/Desktop/MVC'
+mvc_dict = calculate_MVC(path_mvc)
 fs = 250 
-trimmed_data,psd= import_data(path, fs,4,4)
+trimmed_data,psd= import_data(path, fs,4,4,mvc_dict)
 t = np.arange(1/fs, len(trimmed_data[1][0:1, :, 1])/fs + 1/fs,1/fs)
 
-
+iemg, mav, ssi, fmd, fmn, var, rms = extract_features_trials(trimmed_data,psd, False, False)
 
 '''
 Script for plotting epoching example 
@@ -141,7 +143,7 @@ def plot_features(iemg, mav, ssi, fmd, fmn, var, rms, avg_chan, avg_epoch):
 
 
 
-iemg, mav, ssi, fmd, fmn, var, rms = extract_features_trials(trimmed_data,psd, False, False)
+#iemg, mav, ssi, fmd, fmn, var, rms = extract_features_trials(trimmed_data,psd, False, False)
 import pdb; pdb.set_trace()
 #plot_features(iemg, mav, ssi, fmd, fmn, var, rms, False,True)
             

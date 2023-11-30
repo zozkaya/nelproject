@@ -5,29 +5,20 @@ import numpy as np
 import math
 import scipy as scipy 
 from scipy.signal import iirnotch, butter, filtfilt, lfilter
-
+from find_MVC import calculate_MVC
 
 ## GLOBALS 
 # input file path 
 path = '/Users/laurenparola/Desktop/NEL_FinalProject/nov7_prelim/'
+path_mvc = ''
 start_time = 7.5 # number of seconds before starting trial based on bpm of metronome 
 chan_num = 8 # specify channel number for processing 
 
 # set data frequency
 fs = 250
 
-# MVC - MVC determined using MATLAB - global variable bc one subject 
-# FILL IN ONCE YOU KNOW THE VALUES 
-hand_fist_mvc = 1
-index_finger_point_mvc = 1
-wrist_up_mvc = 1
-wrist_down_mvc = 1
-two_finger_pinch_mvc = 1
-wrist_right_mvc = 1
-wrist_left_mvc = 1
-hand_open_mvc = 1
 
-mvc_mat = [hand_fist_mvc, index_finger_point_mvc,wrist_up_mvc, wrist_down_mvc, two_finger_pinch_mvc, wrist_right_mvc, wrist_left_mvc, hand_open_mvc]
+mvc_dict = calculate_MVC(path_mvc)
 #WRITTEN ASSUMING THIS ORDER ?? SHOULD IT BE ALPHABETIC?
 """
 Applies bandpass and notch filter to data 
@@ -130,7 +121,7 @@ fs
 chan_used: 4 if you want to use 4 channels, 8 if you want to use all 8 
 chan_num: specify number of channels used 
 """
-def import_data(path,fs,chan_num,chan_used):
+def import_data(path,fs,chan_num,chan_used,mvc_dict):
     #create a list of .txt. files in the data folder
     trial_list = [trials for trials in os.listdir(path) if '.txt' in trials]
     i = 0 
@@ -155,14 +146,21 @@ def import_data(path,fs,chan_num,chan_used):
             channel_list = [' EXG Channel 0',' EXG Channel 2',' EXG Channel 4',' EXG Channel 6'] #take every other channel
 
       #  start_time = start_times_vec[i]
+        mvc_mat = mvc_dict[key]
 
         active_channels = []
         rest_channels = []
         for channel in channel_list:
             #sort through all channels, trim the epoch data, and append to a 3D matrix called all_channels
-            active_epochs, rest_epochs = epoch_data(start_time, preprocess_data(data[channel].values,fs), t, 1.5,mvc_mat[i])
+            if (chan_num == 8 and chan_used == 4):
+                mvc = mvc_mat[i*2]
+            else:
+                mvc = mvc_mat[i]
+
+            active_epochs, rest_epochs = epoch_data(start_time, preprocess_data(data[channel].values,fs), t, 1.5,mvc)
             active_channels.append(active_epochs)
             rest_channels.append(rest_epochs)
+            i += 1
 
         #extract outliers from the 3D matrix where the first axis represents channels, the second axis
         #represents is time, and third axis is the epoch number
@@ -171,7 +169,6 @@ def import_data(path,fs,chan_num,chan_used):
 
         extracted_trials.append(trimmed_data)
         rest_trials.append(np.array(rest_channels))
-        i += 1
 
         
         psd = []

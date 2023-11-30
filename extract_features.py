@@ -90,10 +90,10 @@ def calc_features(data,psd, window_size=5):
                 total_iemg += iemg
                 total_mav += iemg / window_size
                 total_ssi += np.sum(sq_window_data)
-                total_fmd += np.mean(.5*sum(scipy.signal.welch(window_data)))
+                total_fmd += np.mean(.5*sum(scipy.signal.welch(window_data, 250, nperseg=64)))
                 total_var += window_data.var()
                 total_rms += np.sqrt(np.mean(window_data**2))
-                total_fms += sum(250*scipy.signal.welch(window_data))/sum(scipy.signal.welch(window_data))
+                total_fms += sum(250*scipy.signal.welch(window_data, 250, nperseg=64))/sum(scipy.signal.welch(window_data, 250, nperseg=64))
             
             avg_iemg[channel, epoch] = total_iemg / num_windows
             avg_mav[channel, epoch] = total_mav / num_windows
