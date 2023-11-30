@@ -1,6 +1,7 @@
 from pylsl import StreamInlet, resolve_stream
 import numpy as np
 import threading
+from preprocess_data_with_epoch_extraction import preprocess_data 
 
 ### Settings:
 # On OpenBCI GUI, set widget to Networking
@@ -52,12 +53,12 @@ def main():
         fs = int(info.nominal_srate())  # Sampling rate
         print("Sampling rate: ", fs)
 
-        second_buffer = np.zeros((fs,8))  # Buffer for one second of data
+        second_buffer = np.zeros((fs*1.5,8))  # Buffer for one second of data
         print(second_buffer)
 
         while True:
             # Get a new sample
-            chunk, timestamps = inlet.pull_chunk(timeout=1.0, max_samples=fs)
+            chunk, timestamps = inlet.pull_chunk(timeout=1.5, max_samples=fs)
 
             if timestamps:
                 print("New chunk!")
@@ -70,6 +71,8 @@ def main():
                 else:
                     second_buffer[:] = np.array(chunk)
                     # second_buffer = np.concatenate((second_buffer, np.array(chunk).flatten()))[-fs:]
+                    preprocess_data(second_buffer,fs)
+                 
                     print(second_buffer)
 
                     # if len(second_buffer) >= fs:
