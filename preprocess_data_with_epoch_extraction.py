@@ -17,7 +17,6 @@ chan_num = 8 # specify channel number for processing
 # set data frequency
 fs = 250
 
-
 mvc_dict = calculate_MVC(path_mvc)
 #WRITTEN ASSUMING THIS ORDER ?? SHOULD IT BE ALPHABETIC?
 """
@@ -170,7 +169,6 @@ def import_data(path,fs,chan_num,chan_used,mvc_dict):
         rest_data = extract_outlier_epochs(rest_channels,8,)
         extracted_trials.append(trimmed_data)
         rest_trials.append(rest_data)
-        i += 1
 
         
         psd = []
