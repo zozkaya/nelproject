@@ -170,11 +170,7 @@ def import_data(path,fs,chan_num,chan_used):
         trimmed_data = extract_outlier_epochs(active_channels,8,)
         rest_data = extract_outlier_epochs(rest_channels,8,)
         extracted_trials.append(trimmed_data)
-<<<<<<< HEAD
         rest_trials.append(rest_data)
-=======
-        rest_trials.append(np.array(rest_channels))
->>>>>>> cc9e6b4a994a595bcd2594fed6ea3a1dfd7542aa
         i += 1
 
         
