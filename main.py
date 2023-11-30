@@ -9,6 +9,7 @@ from preprocess_data_with_epoch_extraction import extract_outlier_epochs, import
 from preprocess_data import epoch_data,preprocess_data
 from extract_features import calc_features,extract_features_trials,get_var_trial,get_fmn_trial,get_rms_trial
 from matplotlib.colors import LinearSegmentedColormap
+<<<<<<< HEAD
 from find_MVC import calculate_MVC
 
 path = '/Users/zeynepozkaya/Desktop/DATA 2'
@@ -16,6 +17,17 @@ path_mvc = '/Users/zeynepozkaya/Desktop/MVC'
 mvc_dict = calculate_MVC(path_mvc)
 fs = 250 
 trimmed_data,psd= import_data(path, fs,4,4,mvc_dict)
+=======
+from classify_gesture import train_classifier, compare_task_combinations
+from itertools import combinations
+from find_MVC import calculate_MVC
+path = '/Users/laurenparola/Documents/GitHub/nelproject/DATA/nov7_prelim/'
+fs = 250
+
+#calculate_MVC('/Users/laurenparola/Documents/GitHub/nelproject/DATA/nov21/MVC/')
+trimmed_data,rest_data, psd,trial_order= import_data(path, fs,4,4)
+new_data, new_rest_data, new_psd, new_trial_order = import_data('/Users/laurenparola/Documents/GitHub/nelproject/DATA/nov21/DATA', fs,8,4)
+>>>>>>> 18ada2eee3f03c5214a1c7981575e642c836cacc
 t = np.arange(1/fs, len(trimmed_data[1][0:1, :, 1])/fs + 1/fs,1/fs)
 
 iemg, mav, ssi, fmd, fmn, var, rms = extract_features_trials(trimmed_data,psd, False, False)
@@ -143,7 +155,25 @@ def plot_features(iemg, mav, ssi, fmd, fmn, var, rms, avg_chan, avg_epoch):
 
 
 
+<<<<<<< HEAD
 #iemg, mav, ssi, fmd, fmn, var, rms = extract_features_trials(trimmed_data,psd, False, False)
 import pdb; pdb.set_trace()
 #plot_features(iemg, mav, ssi, fmd, fmn, var, rms, False,True)
             
+=======
+iemg, mav, ssi, fmd, fmn, var, rms = extract_features_trials(trimmed_data,psd, False, False)
+rest_iemg, rest_mav, rest_ssi, rest_fmd, rest_fmn, rest_var, rest_rms = extract_features_trials(rest_data,psd,False,False)
+
+#organize data into matrix
+combined_features = np.hstack([np.concatenate(iemg),np.concatenate(mav),np.concatenate(ssi),np.concatenate(fmd),np.concatenate(fmn),np.concatenate(var),np.concatenate(rms)])
+
+static_rest = np.hstack([np.concatenate(rest_iemg),np.concatenate(rest_mav),np.concatenate(rest_ssi),np.concatenate(rest_fmd),np.concatenate(rest_fmn),np.concatenate(rest_var),np.concatenate(rest_rms)])
+#generate a list of ground truth labels based on how many epochs are in each activity
+labels = np.concatenate([[trial]*len(iemg[val]) for val,trial in enumerate(trial_order)])
+_, = compare_task_combinations(combined_features, labels,static_rest, trial_order)
+
+
+plot_features(iemg, mav, ssi, fmd, fmn, var, rms,False,True)
+
+plot_features(rest_iemg, rest_mav, rest_ssi, rest_fmd, rest_fmn, rest_var, rest_rms, False,True)        
+>>>>>>> 18ada2eee3f03c5214a1c7981575e642c836cacc

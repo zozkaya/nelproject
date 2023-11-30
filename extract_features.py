@@ -54,7 +54,7 @@ window_size: the size of rolling windows in unit of sample #
 OUTPUT:
 avg_iemg, avg_mav, avg_ssi,avg_fms: each output, time features (iemg, mav, and ssi), is a 2D matrix where first axis is channel # and second axis is epoch # 
 """
-def calc_features(data,psd, window_size=5):
+def calc_features(data,psd, window_size=374):
     # Store the dimentions into variables
     num_ch, num_samples, num_epochs = data.shape
     num_windows = num_samples - window_size + 1

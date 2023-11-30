@@ -146,6 +146,7 @@ def import_data(path,fs,chan_num,chan_used,mvc_dict):
             channel_list = [' EXG Channel 0',' EXG Channel 2',' EXG Channel 4',' EXG Channel 6'] #take every other channel
 
       #  start_time = start_times_vec[i]
+        key = act[0:-4]+"_MVC"
         mvc_mat = mvc_dict[key]
 
         active_channels = []
@@ -166,9 +167,14 @@ def import_data(path,fs,chan_num,chan_used,mvc_dict):
         #represents is time, and third axis is the epoch number
         #trimmed_data is the data matrix with the outlier epochs excluded
         trimmed_data = extract_outlier_epochs(active_channels,8,)
-
+        rest_data = extract_outlier_epochs(rest_channels,8,)
         extracted_trials.append(trimmed_data)
+<<<<<<< HEAD
+        rest_trials.append(rest_data)
+=======
         rest_trials.append(np.array(rest_channels))
+>>>>>>> cc9e6b4a994a595bcd2594fed6ea3a1dfd7542aa
+        i += 1
 
         
         psd = []

@@ -13,6 +13,8 @@ def pca_transform(data,n_comp):
     pca = PCA(n_components = n_comp)
     minimized_data = pca.fit_transform(data)
     return minimized_data
+
+# taking any six + rest trial - full list of trials and generates combination of six 
 def compare_task_combinations(combined_features, labels,static_rest, trial_order):
     all_combinations = list(combinations(trial_order, 6))
     for combo in all_combinations:
