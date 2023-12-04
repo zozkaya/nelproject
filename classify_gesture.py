@@ -5,7 +5,9 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from itertools import combinations
 from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import LabelEncoder
 import numpy as np
+from sklearn.metrics import accuracy_score
 from sklearn.decomposition import PCA
 outputs = ["no movement", "clamp close", "clamp open", "wrist left", "wrist right", "arm out", "arm in", "arm up", "arm_down"] 
 
@@ -17,6 +19,7 @@ def pca_transform(data,n_comp):
 # taking any six + rest trial - full list of trials and generates combination of six 
 def compare_task_combinations(combined_features, labels,static_rest, trial_order):
     all_combinations = list(combinations(trial_order, 6))
+   # print(all_combinations)
     for combo in all_combinations:
         locations = [index for index, value in enumerate(labels) if value in combo]
         
@@ -30,11 +33,14 @@ def compare_task_combinations(combined_features, labels,static_rest, trial_order
         
         print('SVM Accuracy:'+str(train_classifier(temp_features, temp_labels, 'SVM')))
         print('KNN Accuracy:'+str(train_classifier(temp_features, temp_labels, 'KNN')))
-        import pdb; pdb.set_trace()
+        print('logistic Accuracy:'+str(train_classifier(temp_features, temp_labels, 'logistic')))
+       # import pdb; pdb.set_trace()
     return locations
+
 def determine_feature_importance(data,labels):
     
     return
+
 def train_classifier(data, labels,model):
     X_train, X_test, y_train, y_test = train_test_split(data, labels, random_state = 0) 
     if model == 'SVM':
@@ -45,13 +51,21 @@ def train_classifier(data, labels,model):
         knn = KNeighborsClassifier(n_neighbors = 7).fit(X_train, y_train) 
         accuracy = knn.score(X_test, y_test)
     if model == 'logistic':
-        logistic = LogisticRegression(penalty='l2', C=1.0, multi_class='multinomial', solver='lbfgs', max_iter=1000)
-        logistic.fit(X_train, y_train)
+        label_encoder = LabelEncoder() #initializing label encoder 
+
+        y_train = label_encoder.fit_transform(y_train)
+        y_test = label_encoder.fit_transform(y_test)
+
+        y_train = y_train.reshape(-1,1)
+
+        X_train = X_train.reshape(-1, 5)
+        X_test = X_test.reshape(-1, 5)
+
+
+        logistic = LogisticRegression(penalty='l2', C=1.0, multi_class='multinomial', solver='lbfgs', max_iter=10000)
+        logistic.fit(X_train, y_train.ravel())
         y_pred = logistic.predict(X_test)
-        accuracy = logistic.score(y_test, y_pred)
+        accuracy = accuracy_score(y_test.ravel(), y_pred.ravel())
         
     return accuracy
-def classify_gesture():
-    i = random.randint(0, 8)
 
-    return outputs[i]
