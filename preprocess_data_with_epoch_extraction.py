@@ -17,7 +17,6 @@ chan_num = 8 # specify channel number for processing
 # set data frequency
 fs = 250
 
-mvc_dict = calculate_MVC(path_mvc)
 #WRITTEN ASSUMING THIS ORDER ?? SHOULD IT BE ALPHABETIC?
 """
 Applies bandpass and notch filter to data 
@@ -99,7 +98,7 @@ def extract_outlier_epochs(all_trial_array,multiplier):
 
         #create a 4 by 1 array of threshold based on the average value of each channels times a certain
         #multiplier
-        threshold_array = np.mean(np.abs(temp_epoch),axis=1).reshape(4,1) * multiplier
+        threshold_array = np.mean(np.abs(temp_epoch),axis=1).reshape(8,1) * multiplier
         
         #determine if any value in a channel is greater than its threshold 
         result = np.any(np.abs(temp_epoch) > threshold_array, axis=1)
@@ -123,12 +122,12 @@ chan_num: specify number of channels used
 def import_data(path,fs,chan_num,chan_used,mvc_dict):
     #create a list of .txt. files in the data folder
     trial_list = [trials for trials in os.listdir(path) if '.txt' in trials]
-    i = 0 
     extracted_trials = []
     rest_trials = []
     #sort through all trials
 
     for val,act in enumerate(trial_list):
+        i = 0 
         #import .txt file as a pandas dataframe
         data=  pd.read_csv(os.path.join(path,act), header=0,sep=',',skiprows=4)
         
@@ -156,11 +155,11 @@ def import_data(path,fs,chan_num,chan_used,mvc_dict):
                 mvc = mvc_mat[i*2]
             else:
                 mvc = mvc_mat[i]
+            i += 1 
 
             active_epochs, rest_epochs = epoch_data(start_time, preprocess_data(data[channel].values,fs), t, 1.5,mvc)
             active_channels.append(active_epochs)
             rest_channels.append(rest_epochs)
-            i += 1
 
         #extract outliers from the 3D matrix where the first axis represents channels, the second axis
         #represents is time, and third axis is the epoch number

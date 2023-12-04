@@ -106,7 +106,7 @@ def calc_features(data,psd, window_size=374):
     return avg_iemg, avg_mav, avg_ssi, avg_fmd, avg_var, avg_rms, avg_fmn
 
 
-def real_time_calc(window_data):
+def real_time_calc_features(window_data):
 
     total_iemg = []
     total_mav = []
@@ -117,7 +117,7 @@ def real_time_calc(window_data):
     total_fms = []
 
 
-    for i in range(len(window_data[1])):
+    for i in range(len(window_data[1])): #window_data[1] is channel size
         window_size = len(window_data)
 
         abs_window_data = np.abs(window_data)
@@ -132,6 +132,7 @@ def real_time_calc(window_data):
         total_var.append(window_data.var())
         total_rms.append(np.sqrt(np.mean(window_data**2)))
         total_fms.append(sum(250*scipy.signal.welch(window_data, 250, nperseg=64))/sum(scipy.signal.welch(window_data, 250, nperseg=64)))
+
     return  total_iemg, total_mav,total_ssi, total_fmd , total_var ,  total_rms , total_fms 
 
 
