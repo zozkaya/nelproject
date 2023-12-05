@@ -1,7 +1,16 @@
 from pylsl import StreamInlet, resolve_stream
 import numpy as np
-from preprocess_data_with_epoch_extraction import preprocess_data
-from extract_features import calc_features
+import threading
+from preprocess_data_with_epoch_extraction import preprocess_data 
+from extract_features import real_time_calc_features
+from find_MVC import calculate_MVC_realtime
+import pickle
+
+mvc_list = np.array([-723.0118778958175, -97.4759575695941, -2055.220550921029, 2011.522890510904, 4650.414544393367, 
+ 4772.410365630432, 1688.7189970873592, -2478.160259504349])
+
+svm_model = pickle.load(open('svm_model.pkl', 'rb'))
+
 
 ### Settings:
 # On OpenBCI GUI, set widget to Networking
@@ -45,7 +54,7 @@ def main():
         streams = resolve_stream('type', 'EMG')
 
         # Create a new inlet to read from the stream
-        inlet = StreamInlet(streams[0])
+        inlet = StreamInlet(streams[0], max_chunklen=12)
         eeg_time_correction = inlet.time_correction()
 
         info = inlet.info()  # Define the 'info' object
@@ -53,34 +62,31 @@ def main():
         fs = int(info.nominal_srate())  # Sampling rate
         print("Sampling rate: ", fs)
 
-        buffer_length = int(fs * 1.5)
-        buffer_window = np.zeros((buffer_length,8))  # Buffer for one second of data
-        print(buffer_window)
+        second_buffer = np.zeros((fs*1.5,8))  # Buffer for one second of data
+        print(second_buffer)
 
         while True:
             # Get a new sample
-            chunk, timestamps = inlet.pull_chunk(timeout=1.5, max_samples=buffer_length)
+            chunk, timestamps = inlet.pull_chunk(timeout=1.5, max_samples=fs)
 
             if timestamps:
                 print("New chunk!")
                 len_chunk = len(chunk)
                 print("Length: ", len(chunk), "Width: ", len(chunk[0]), "Type: ", type(chunk))
                 
-                chunk_array = np.array(chunk)
-                if len_chunk > buffer_length:
-                    chunk_array = chunk_array[:buffer_length]  # Trim extra samples
-                elif len_chunk < buffer_length:
-                    # Pad with zeros if chunk is smaller than expected
-                    chunk_array = np.pad(chunk_array, ((0, buffer_length - len_chunk), (0, 0)), 'constant')
+                if len_chunk < fs: # May lost some sample in the first chunk
+                    print("Incomplete chunk window")
 
-                buffer_window[:] = chunk_array
-                prepross_data = preprocess_data(buffer_window, fs)
-                
-                # extract_features = calc_features(buffer_window, 0, 250)
-                
-                print(buffer_window)
-                print(prepross_data)
+                else:
+                    second_buffer[:] = np.array(chunk)
+                    # second_buffer = np.concatenate((second_buffer, np.array(chunk).flatten()))[-fs:]
+                    preproc_data = preprocess_data(second_buffer,fs)/mvc_list
+                    combined_features = real_time_calc_features(preproc_data)
 
+                    predictions = svm_model.predict(combined_features)
+
+                 
+                    print(second_buffer)
 
                     # if len(second_buffer) >= fs:
                     #     # Now 'second_buffer' contains one second of data
