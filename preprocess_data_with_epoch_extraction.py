@@ -81,7 +81,7 @@ def epoch_data(start_time, data, t,epoch_len,mvc):
     
     return epoched_data, rest_state 
 
-def extract_outlier_epochs(all_trial_array,multiplier):
+def extract_outlier_epochs(all_trial_array,multiplier,channel_num):
     #inputs:
         #all_trial_array: a 3D matrix, where channels (1-4) is the first axis, the time is the second
         #axis, and the third axis is the epoch number
@@ -99,7 +99,7 @@ def extract_outlier_epochs(all_trial_array,multiplier):
 
         #create a 4 by 1 array of threshold based on the average value of each channels times a certain
         #multiplier
-        threshold_array = np.mean(np.abs(temp_epoch),axis=1).reshape(8,1) * multiplier
+        threshold_array = np.mean(np.abs(temp_epoch),axis=1).reshape(channel_num,1) * multiplier
         
         #determine if any value in a channel is greater than its threshold 
         result = np.any(np.abs(temp_epoch) > threshold_array, axis=1)
@@ -168,8 +168,8 @@ def import_data(path,fs,chan_num,chan_used,mvc_dict):
         #extract outliers from the 3D matrix where the first axis represents channels, the second axis
         #represents is time, and third axis is the epoch number
         #trimmed_data is the data matrix with the outlier epochs excluded
-        trimmed_data = extract_outlier_epochs(active_channels,8,)
-        rest_data = extract_outlier_epochs(rest_channels,8,)
+        trimmed_data = extract_outlier_epochs(active_channels,8,len(channel_list))
+        rest_data = extract_outlier_epochs(rest_channels,8,len(channel_list))
         extracted_trials.append(trimmed_data)
         rest_trials.append(rest_data)
 
