@@ -20,9 +20,9 @@ def pca_transform(data,n_comp):
     return minimized_data
 
 # taking any six + rest trial - full list of trials and generates combination of six 
-def compare_task_combinations(combined_features, labels,static_rest, trial_order,path):
+def compare_task_combinations(combined_features, labels,static_rest, trial_order):
     all_combinations = list(combinations(trial_order, 6))
-    
+    random_indices = np.random.choice(static_rest.shape[0], 46, replace=False)
     for combo in all_combinations:
         locations = [index for index, value in enumerate(labels) if value in combo]
         
@@ -30,17 +30,20 @@ def compare_task_combinations(combined_features, labels,static_rest, trial_order
         knn_list = []
 
 
-        #add static data 
-        temp_features = np.concatenate((combined_features[locations],static_rest[0:23,:]))
+        #add static data
+        
+
+        
+        temp_features = np.concatenate((combined_features[locations],static_rest[random_indices,:]))
       #  temp_features = pca_transform(temp_features, 5)
-        temp_labels = np.concatenate((labels[locations],['rest']*23))
+        temp_labels = np.concatenate((labels[locations],['rest']*46))
 
         svm_accuracy, svm_model, score_svm = train_classifier(temp_features, temp_labels, 'SVM')
         knn_accuracy, knn_model, score_knn = train_classifier(temp_features, temp_labels, 'KNN')
         logistic_accuracy, logistic_model, score_log = train_classifier(temp_features, temp_labels, 'logistic')
 
-        if (combo == ('hand_fist', 'wrist_down', 'two_finger_pinch', 'wrist_right', 'wrist_left', 'hand_open')):
-            pickle.dump(svm_model, open('model.pkl', 'wb'))
+       # if (combo == ('hand_fist', 'wrist_down', 'two_finger_pinch', 'wrist_right', 'wrist_left', 'hand_open')):
+        #    pickle.dump(svm_model, open('model.pkl', 'wb'))
 
         print("Combination: ", combo)
         print('SVM Accuracy:'+str(svm_accuracy))
@@ -69,16 +72,16 @@ def train_classifier(data, labels,model):
 
         # kFold validation 
         kf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-        score = cross_val_score(model, X_train, y_train, cv=kf, scoring='accuracy')
+        score = cross_val_score(model, data, labels, cv=kf, scoring='accuracy')
 
     if model == 'KNN':
-        knn = KNeighborsClassifier(n_neighbors = 7).fit(X_train, y_train) 
+        knn = KNeighborsClassifier(n_neighbors = 10).fit(X_train, y_train) 
         model = knn
         accuracy = knn.score(X_test, y_test)
 
         # kFold validation 
         kf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-        score = cross_val_score(model, X_train, y_train, cv=kf, scoring='accuracy')
+        score = cross_val_score(model, data, labels, cv=kf, scoring='accuracy')
 
     if model == 'logistic':
         label_encoder = LabelEncoder() #initializing label encoder 
@@ -91,17 +94,19 @@ def train_classifier(data, labels,model):
       #  X_train = X_train.reshape(-1, 5)
      #   X_test = X_test.reshape(-1, 5)
 
-        logistic = LogisticRegression(penalty='l2', C=1.0, multi_class='multinomial', solver='lbfgs', max_iter=10000)
+        logistic = LogisticRegression(penalty='l1', C=1.0, solver='liblinear', max_iter=100000)
+        
         model = logistic 
         logistic.fit(X_train, y_train.ravel())
+
         y_pred = logistic.predict(X_test)
         accuracy = accuracy_score(y_test.ravel(), y_pred.ravel())
 
         kf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-        score = cross_val_score(model, X_train, y_train, cv=kf, scoring='accuracy')
+        score = cross_val_score(model, data, labels, cv=kf, scoring='accuracy')
 
         
-    return accuracy, model,score
+    return accuracy, model,np.mean(score)
 
 def cross_validate(model,metric):
     num_folds = 5  # Replace with your chosen number of folds
