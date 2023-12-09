@@ -12,6 +12,19 @@ from matplotlib.colors import LinearSegmentedColormap
 from classify_gesture import train_classifier, compare_task_combinations
 from itertools import combinations
 from find_MVC import calculate_MVC
+
+path = '/Users/laurenparola/Documents/GitHub/nelproject/DATA/nov21/DATA'
+fs = 250
+
+mvc_dict= calculate_MVC('/Users/laurenparola/Documents/GitHub/nelproject/DATA/nov21/MVC/')
+trimmed_data,rest_data, psd,trial_order= import_data(path, fs,8,8,mvc_dict)
+
+trial_two_path = '/Users/laurenparola/Documents/GitHub/nelproject/DATA/dec5'
+trimmed_data_two,rest_data_two, psd_two,trial_order_two= import_data(trial_two_path, fs,8,8,mvc_dict)
+#new_data, new_rest_data, new_psd, new_trial_order,new_active_accel_trials,new_rest_accel_trials = import_data('/Users/laurenparola/Documents/GitHub/nelproject/DATA/nov21/DATA', fs,8,4,True)
+t = np.arange(1/fs, len(trimmed_data[1][0:1, :, 1])/fs + 1/fs,1/fs)
+
+
 path_new = '/Users/zeynepozkaya/Desktop/nov21/DATA'
 path_old = '/Users/zeynepozkaya/Desktop/nov7_prelim'
 path_mvc = '/Users/zeynepozkaya/Desktop/nov21/MVC'
@@ -150,6 +163,20 @@ def plot_features(iemg, mav, ssi, fmd, fmn, var, rms, avg_chan, avg_epoch):
 
 
 
+
+iemg, mav, ssi, fmd, fmn, var, rms = extract_features_trials(trimmed_data,psd, False, False)
+rest_iemg, rest_mav, rest_ssi, rest_fmd, rest_fmn, rest_var, rest_rms = extract_features_trials(rest_data,psd,False,False)
+combined_features_nov21 = np.hstack([np.concatenate(iemg),np.concatenate(mav),np.concatenate(ssi),np.concatenate(fmd),np.concatenate(fmn),np.concatenate(var),np.concatenate(rms)])
+static_rest_nov21 = np.hstack([np.concatenate(rest_iemg),np.concatenate(rest_mav),np.concatenate(rest_ssi),np.concatenate(rest_fmd),np.concatenate(rest_fmn),np.concatenate(rest_var),np.concatenate(rest_rms)])
+labels_nov21 = np.concatenate([[trial]*len(iemg[val]) for val,trial in enumerate(trial_order)])
+
+iemg, mav, ssi, fmd, fmn, var, rms = extract_features_trials(trimmed_data_two,psd_two, False, False)
+rest_iemg, rest_mav, rest_ssi, rest_fmd, rest_fmn, rest_var, rest_rms = extract_features_trials(rest_data_two,psd_two,False,False)
+
+#organize data into matrix
+combined_features_dec5 = np.hstack([np.concatenate(iemg),np.concatenate(mav),np.concatenate(ssi),np.concatenate(fmd),np.concatenate(fmn),np.concatenate(var),np.concatenate(rms)])
+#combined_features = np.hstack([np.concatenate(iemg),np.concatenate(mav),np.concatenate(ssi),np.concatenate(fmd),np.concatenate(fmn),np.concatenate(var),np.concatenate(rms),np.concatenate([col.mean(axis=1) for col  in active_accel_trials],axis=1).T])
+
 #iemg, mav, ssi, fmd, fmn, var, rms = extract_features_trials(trimmed_data,psd, False, False)
 #import pdb; pdb.set_trace()
 #plot_features(iemg, mav, ssi, fmd, fmn, var, rms, False,True)
@@ -161,13 +188,25 @@ rest_iemg, rest_mav, rest_ssi, rest_fmd, rest_fmn, rest_var, rest_rms = extract_
 combined_features = np.hstack([np.concatenate(iemg),np.concatenate(mav),np.concatenate(ssi),np.concatenate(fmd),np.concatenate(fmn),np.concatenate(var),np.concatenate(rms)])
 rest_iemg, rest_mav, rest_ssi, rest_fmd, rest_fmn, rest_var, rest_rms = extract_features_trials(new_rest_data,new_psd,False,False)
 
-static_rest = np.hstack([np.concatenate(rest_iemg),np.concatenate(rest_mav),np.concatenate(rest_ssi),np.concatenate(rest_fmd),np.concatenate(rest_fmn),np.concatenate(rest_var),np.concatenate(rest_rms)])
+
+
+static_rest_dec5 = np.hstack([np.concatenate(rest_iemg),np.concatenate(rest_mav),np.concatenate(rest_ssi),np.concatenate(rest_fmd),np.concatenate(rest_fmn),np.concatenate(rest_var),np.concatenate(rest_rms)])
+#static_rest = np.hstack([np.concatenate(rest_iemg),np.concatenate(rest_mav),np.concatenate(rest_ssi),np.concatenate(rest_fmd),np.concatenate(rest_fmn),np.concatenate(rest_var),np.concatenate(rest_rms),np.concatenate([col.mean(axis=1) for col  in rest_accel_trials],axis=1).T])
 #generate a list of ground truth labels based on how many epochs are in each activity
+
+
+labels_dec5 = np.concatenate([[trial]*len(iemg[val]) for val,trial in enumerate(trial_order_two)])
+static_rest = np.vstack([static_rest_nov21,static_rest_dec5])
+combined_features = np.vstack([combined_features_nov21,combined_features_dec5])
+labels = np.hstack([labels_nov21,labels_dec5])
+locations = compare_task_combinations(combined_features, labels,static_rest, trial_order)
+
 labels = np.concatenate([[trial]*len(iemg[val]) for val,trial in enumerate(new_trial_order)])
+
 
 _, = compare_task_combinations(combined_features, labels,static_rest, new_trial_order,path_model)
 print("done")
 
-plot_features(iemg, mav, ssi, fmd, fmn, var, rms,False,True)
+#plot_features(iemg, mav, ssi, fmd, fmn, var, rms,False,True)
 
-plot_features(rest_iemg, rest_mav, rest_ssi, rest_fmd, rest_fmn, rest_var, rest_rms, False,True)        
+#plot_features(rest_iemg, rest_mav, rest_ssi, rest_fmd, rest_fmn, rest_var, rest_rms, False,True)        
