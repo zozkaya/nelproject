@@ -185,3 +185,5 @@ def import_data(path,fs,chan_num,chan_used,mvc_dict):
     return extracted_trials, rest_trials, psd, trial_order
             
         
+
+        

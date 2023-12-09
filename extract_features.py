@@ -122,6 +122,9 @@ def real_time_calc_features(window_data_all):
     for i in range((len(window_data_all[1]))): #window_data[1] is channel size
         window_size = len(window_data_all[0])
         window_data = window_data_all[:,i]
+    for i in range((len(window_data_all[1]))): #window_data[1] is channel size
+        window_size = len(window_data_all[0])
+        window_data = window_data_all[:,i]
 
         abs_window_data = np.abs(window_data)
         sq_window_data = np.square(window_data)
@@ -216,3 +219,4 @@ def extract_features_trials(trimmed_data, psd, avg_chan, avg_epoch):
         
     
     return iemg_all, mav_all, ssi_all, fmd_all, fmn_all, var_all, rms_all 
+

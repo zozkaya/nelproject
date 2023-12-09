@@ -13,7 +13,12 @@ mvc_list = np.array([-723.0118778958175, -97.4759575695941, -2055.220550921029, 
 svm_model = pickle.load(open('svm_model.pkl', 'rb'))
 prediction = 'no gesture detected'
 
+<<<<<<< HEAD
 create_bci_gui(prediction)
+=======
+create_bci_gui(prediction) #launches GUI 
+
+>>>>>>> dd0c7d52b6bffd45c187716ec5fb827f4e3c4d53
 
 ### Settings:
 # On OpenBCI GUI, set widget to Networking
