@@ -1,9 +1,7 @@
 import tkinter as tk
 import time
-from classify_gesture import classify_gesture
 
-
-def create_bci_gui():
+def create_bci_gui(gesture):
     # Create the main window
     window = tk.Tk()
     window.title("BCI GUI")
@@ -19,14 +17,28 @@ def create_bci_gui():
     title_label.pack(pady=10)
     title_label.configure(bg="white")
 
-
-    display_gestures(window,gesture)
+    display_gestures(window, gesture)
 
     # Start the GUI event loop
+    window.after(1000, lambda: update_labels(window, gesture))
     window.mainloop()
 
-def display_gestures(window,gesture):
-     
+def update_labels(window, gesture):
+    # Replace this with your actual data update logic
+    current_time = time.strftime("%H:%M:%S")
+
+    # Update the detected gesture label
+    subtitle_label.config(text="Detected gesture: " + current_time)
+
+    # Update the arm movement label
+    subtitle_label2.config(text="Arm movement: " + current_time)
+
+    # Schedule the next update
+    window.after(1000, lambda: update_labels(window, gesture))
+
+def display_gestures(window, gesture):
+    # Your existing display_gestures function remains unchanged
+
     if gesture == "no movement":
         human_gesture = "resting state"
     elif gesture == "clamp close":
@@ -46,6 +58,7 @@ def display_gestures(window,gesture):
     elif gesture == "arm down":
         human_gesture = "wrist down"
 
+    global subtitle_label, subtitle_label2
     subtitle_label = tk.Label(window, text="Detected gesture: " + human_gesture, font=("Helvetica", 15), fg='black')
     subtitle_label.pack(pady=5)
     subtitle_label.configure(bg="white")
@@ -53,7 +66,3 @@ def display_gestures(window,gesture):
     subtitle_label2 = tk.Label(window, text="Arm movement: " + gesture, font=("Helvetica", 15), fg='black')
     subtitle_label2.pack(pady=5)
     subtitle_label2.configure(bg="white")
-
-
-# Call the function to create the GUI
-create_bci_gui()
