@@ -106,7 +106,7 @@ def calc_features(data,psd, window_size=374):
     return avg_iemg, avg_mav, avg_ssi, avg_fmd, avg_var, avg_rms, avg_fmn
 
 
-def real_time_calc_features(window_data):
+def real_time_calc_features(window_data_all):
 
     total_iemg = []
     total_mav = []
@@ -114,11 +114,14 @@ def real_time_calc_features(window_data):
     total_fmd = []
     total_var = []
     total_rms = []
-    total_fms = []
+    total_fmn = []
 
 
-    for i in range(len(window_data[1])): #window_data[1] is channel size
-        window_size = len(window_data)
+
+
+    for i in range((len(window_data_all[1]))): #window_data[1] is channel size
+        window_size = len(window_data_all[0])
+        window_data = window_data_all[:,i]
 
         abs_window_data = np.abs(window_data)
         sq_window_data = np.square(window_data)
@@ -131,10 +134,13 @@ def real_time_calc_features(window_data):
         total_fmd.append(np.mean(.5*sum(scipy.signal.welch(window_data, 250, nperseg=64))))
         total_var.append(window_data.var())
         total_rms.append(np.sqrt(np.mean(window_data**2)))
-        total_fms.append(sum(250*scipy.signal.welch(window_data, 250, nperseg=64))/sum(scipy.signal.welch(window_data, 250, nperseg=64)))
+        total_fmn.append(np.sum(250*scipy.signal.welch(window_data, 250, nperseg=64))/np.sum(scipy.signal.welch(window_data, 250, nperseg=64)))
 
-    return  total_iemg, total_mav,total_ssi, total_fmd , total_var ,  total_rms , total_fms 
+    combined_features = np.hstack([(total_iemg),(total_mav),(total_ssi),(total_fmd),(total_fmn),(total_var),(total_rms)])
 
+    return combined_features
+
+print(np.shape(real_time_calc_features(np.ones((375,8)))))
 
 """
 Extracts features for each trial uses calc_features function and 

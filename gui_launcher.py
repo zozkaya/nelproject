@@ -2,15 +2,6 @@ import tkinter as tk
 import time
 from classify_gesture import classify_gesture
 
-class RoboticArm(tk.Canvas):
-    def __init__(self, master=None, **kwargs):
-        tk.Canvas.__init__(self, master, **kwargs)
-        self.base = self.create_rectangle(195, 250, 205, 400, fill="blue")  # Base of the arm
-        self.arm = self.create_rectangle(195, 400, 205, 500, fill="red")  # Arm
-        #self.bind("<Configure>", self.update_arm_position)
-
-    def update_arm_position(self, event=None):
-        self.coords(self.arm, self.winfo_width() / 2 - 5, self.winfo_height() / 2, self.winfo_width() / 2 + 5, self.winfo_height() / 2 + 100)
 
 def create_bci_gui():
     # Create the main window
@@ -28,19 +19,14 @@ def create_bci_gui():
     title_label.pack(pady=10)
     title_label.configure(bg="white")
 
-    # Create the robotic arm canvas
-  #  robotic_arm_canvas = RoboticArm(window, width=400, height=400, bg="white")
-    #robotic_arm_canvas.pack(pady=10)
 
-    display_gestures(window)
+    display_gestures(window,gesture)
 
     # Start the GUI event loop
     window.mainloop()
 
-def display_gestures(window):
-    gesture = classify_gesture()
-    gesture = "arm up"
-
+def display_gestures(window,gesture):
+     
     if gesture == "no movement":
         human_gesture = "resting state"
     elif gesture == "clamp close":
@@ -57,7 +43,6 @@ def display_gestures(window):
         human_gesture = "index finger point"
     elif gesture == "arm up":
         human_gesture = "wrist up"
-      #  move_robotic_arm_up(robotic_arm_canvas)
     elif gesture == "arm down":
         human_gesture = "wrist down"
 
@@ -69,17 +54,6 @@ def display_gestures(window):
     subtitle_label2.pack(pady=5)
     subtitle_label2.configure(bg="white")
 
-def move_robotic_arm_up(robotic_arm_canvas):
-    for _ in range(50):
-        robotic_arm_canvas.after(10, robotic_arm_canvas.update)
-        robotic_arm_canvas.move(robotic_arm_canvas.arm, 0, -1)
-        robotic_arm_canvas.after(10, time.sleep, 0.01)
-
-def move_robotic_arm_down(robotic_arm_canvas):
-    for _ in range(50):
-        robotic_arm_canvas.after(10, robotic_arm_canvas.update)
-        robotic_arm_canvas.move(robotic_arm_canvas.arm, 0, 1)
-        robotic_arm_canvas.after(10, time.sleep, 0.01)
 
 # Call the function to create the GUI
 create_bci_gui()

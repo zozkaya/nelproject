@@ -14,6 +14,7 @@ path_mvc = ''
 start_time = 7.5 # number of seconds before starting trial based on bpm of metronome 
 chan_num = 8 # specify channel number for processing 
 
+
 # set data frequency
 fs = 250
 
@@ -112,6 +113,8 @@ def extract_outlier_epochs(all_trial_array,multiplier):
     
     return out_data
 
+
+
 """
 INPUTS: 
 path
@@ -145,6 +148,7 @@ def import_data(path,fs,chan_num,chan_used,mvc_dict):
 
       #  start_time = start_times_vec[i]
         key = act[0:-4]+"_MVC"
+
         mvc_mat = mvc_dict[key]
 
         active_channels = []

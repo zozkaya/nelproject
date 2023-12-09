@@ -15,6 +15,7 @@ from find_MVC import calculate_MVC
 path_new = '/Users/zeynepozkaya/Desktop/nov21/DATA'
 path_old = '/Users/zeynepozkaya/Desktop/nov7_prelim'
 path_mvc = '/Users/zeynepozkaya/Desktop/nov21/MVC'
+path_model = '/Users/zeynepozkaya/Desktop/nelproject'
 
 mvc_dict = calculate_MVC('/Users/zeynepozkaya/Desktop/nov21/MVC')
 fs = 250
@@ -152,17 +153,19 @@ def plot_features(iemg, mav, ssi, fmd, fmn, var, rms, avg_chan, avg_epoch):
 #iemg, mav, ssi, fmd, fmn, var, rms = extract_features_trials(trimmed_data,psd, False, False)
 #import pdb; pdb.set_trace()
 #plot_features(iemg, mav, ssi, fmd, fmn, var, rms, False,True)
-    
+
 iemg, mav, ssi, fmd, fmn, var, rms = extract_features_trials(new_data,new_psd, False, False)
 rest_iemg, rest_mav, rest_ssi, rest_fmd, rest_fmn, rest_var, rest_rms = extract_features_trials(new_rest_data,new_psd,False,False)
- 
+
 #organize data into matrix
 combined_features = np.hstack([np.concatenate(iemg),np.concatenate(mav),np.concatenate(ssi),np.concatenate(fmd),np.concatenate(fmn),np.concatenate(var),np.concatenate(rms)])
+rest_iemg, rest_mav, rest_ssi, rest_fmd, rest_fmn, rest_var, rest_rms = extract_features_trials(new_rest_data,new_psd,False,False)
 
 static_rest = np.hstack([np.concatenate(rest_iemg),np.concatenate(rest_mav),np.concatenate(rest_ssi),np.concatenate(rest_fmd),np.concatenate(rest_fmn),np.concatenate(rest_var),np.concatenate(rest_rms)])
 #generate a list of ground truth labels based on how many epochs are in each activity
 labels = np.concatenate([[trial]*len(iemg[val]) for val,trial in enumerate(new_trial_order)])
-_, = compare_task_combinations(combined_features, labels,static_rest, new_trial_order)
+
+_, = compare_task_combinations(combined_features, labels,static_rest, new_trial_order,path_model)
 print("done")
 
 plot_features(iemg, mav, ssi, fmd, fmn, var, rms,False,True)

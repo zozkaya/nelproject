@@ -2,6 +2,18 @@ from pylsl import StreamInlet, resolve_stream
 import numpy as np
 import threading
 from preprocess_data_with_epoch_extraction import preprocess_data 
+from extract_features import real_time_calc_features
+from find_MVC import calculate_MVC_realtime
+import pickle
+from gui_launcher import create_bci_gui  
+
+mvc_list = np.array([-723.0118778958175, -97.4759575695941, -2055.220550921029, 2011.522890510904, 4650.414544393367, 
+ 4772.410365630432, 1688.7189970873592, -2478.160259504349])
+
+svm_model = pickle.load(open('svm_model.pkl', 'rb'))
+prediction = 'no gesture detected'
+
+create_bci_gui(prediction)
 
 ### Settings:
 # On OpenBCI GUI, set widget to Networking
@@ -39,6 +51,7 @@ from preprocess_data_with_epoch_extraction import preprocess_data
 
 ### Main function:
 def main():
+    global prediction 
     try:
         # First resolve an EMG stream on the lab network
         print("Looking for an EMG stream...")
@@ -71,7 +84,11 @@ def main():
                 else:
                     second_buffer[:] = np.array(chunk)
                     # second_buffer = np.concatenate((second_buffer, np.array(chunk).flatten()))[-fs:]
-                    preprocess_data(second_buffer,fs)
+                    preproc_data = preprocess_data(second_buffer,fs)/mvc_list
+                    combined_features = real_time_calc_features(preproc_data)
+
+                    prediction = svm_model.predict(combined_features)
+
                  
                     print(second_buffer)
 
